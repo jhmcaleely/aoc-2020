@@ -25,21 +25,23 @@
 
 
 ;; Recursively search pairs in a list that match the supplied predicate
-(defun find-pair-if (list predicate-p)
+(defun %find-pair-if (list predicate-p)
   (let ((head (first list))
 	(tail (rest list)))
     (when tail
       (let ((match (find-if (lambda (a) (funcall predicate-p head a)) tail)))
 	(if match
-	    (cons head match)
-	    (find-pair-if tail predicate-p))))))
+	    (list head match)
+	    (%find-pair-if tail predicate-p))))))
+
+(defun find-pair-if (list n)
+  (%find-pair-if list (lambda (a b) (= (+ a b) n))))
 
 
-(defun compute-answer (input)
-  (let ((match (find-pair-if input
-			     (lambda (a b)
-			       (= (+ a b) 2020)))))
-    (* (car match) (cdr match))))
+(defun compute-answer-x (input n predicate)
+  (let ((match (funcall predicate input n)))
+    (when match
+      (reduce #'* match))))
 
 
 ;; Read each line as an integer
@@ -52,12 +54,12 @@
 
 ;; First evaluate the example
 (when (/= 514579
-	  (compute-answer '(1721 979 366 299 675 1456)))
+	  (compute-answer-x '(1721 979 366 299 675 1456) 2020 #'find-pair-if))
   (error "Test case failed"))
 
 
 ;; 787776
-(print (compute-answer (read-numbers-as-list "input.txt")))
+(print (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-pair-if))
 
 ;; The Elves in accounting are thankful for your help one of them even
 ;; offers you a starfish coin they had left over from a past
@@ -77,22 +79,16 @@
 	 (remainder (- n one))
 	 (tail (rest list)))
     (when (and tail (< 0 remainder))
-      (let ((match (find-pair-if tail (lambda (x y) (= (+ x y) remainder)))))
+      (let ((match (find-pair-if tail remainder)))
 	(if match
-	    (list one (car match) (cdr match))
+	    (list one (first match) (second match))
 	    (find-triple-if tail n))))))
 
 
-(defun compute-answer-part-2 (input)
-  (let ((match (find-triple-if input 2020)))
-    (when match
-      (reduce #'* match))))
-
-
 (when (/= 241861950
-	  (compute-answer-part-2 '(1721 979 366 299 675 1456)))
+	  (compute-answer-x '(1721 979 366 299 675 1456) 2020 #'find-triple-if))
   (error "Part 2 test case failed"))
 
 
 ;; 262738554
-(print (compute-answer-part-2 (read-numbers-as-list "input.txt")))
+(print (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-triple-if))
