@@ -1,2 +1,4 @@
 #!/bin/bash
-ccl -l 1/1.lisp
+pushd 1
+ccl -l 1.lisp
+popd
