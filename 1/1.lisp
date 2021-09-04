@@ -58,3 +58,41 @@
 
 ;; 787776
 (print (compute-answer (read-numbers-as-list "input.txt")))
+
+;; The Elves in accounting are thankful for your help one of them even
+;; offers you a starfish coin they had left over from a past
+;; vacation. They offer you a second one if you can find three numbers
+;; in your expense report that meet the same criteria.
+;;
+;; Using the above example again, the three entries that sum to 2020
+;; are 979, 366, and 675. Multiplying them together produces the
+;; answer, 241861950.
+;;
+;; In your expense report, what is the product of the three entries
+;; that sum to 2020?
+
+
+(defun find-triple-if (list n)
+  (let* ((one (first list))
+	 (remainder (- n one))
+	 (tail (rest list)))
+    (when (and tail (< 0 remainder))
+      (let ((match (find-pair-if tail (lambda (x y) (= (+ x y) remainder)))))
+	(if match
+	    (list one (car match) (cdr match))
+	    (find-triple-if tail n))))))
+
+
+(defun compute-answer-part-2 (input)
+  (let ((match (find-triple-if input 2020)))
+    (when match
+      (reduce #'* match))))
+
+
+(when (/= 241861950
+	  (compute-answer-part-2 '(1721 979 366 299 675 1456)))
+  (error "Part 2 test case failed"))
+
+
+;; 262738554
+(print (compute-answer-part-2 (read-numbers-as-list "input.txt")))
