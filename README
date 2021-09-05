@@ -1,1 +1,14 @@
 A personal attempt at Advent of Code 2020
+
+https://adventofcode.com/2020
+
+Requires CCL, tested on Ubuntu 20.04.3 LTS (x86, 64-bit)
+
+Evaluate current answers
+$ ./aoc
+
+Test against model answers
+$ ./aoc | diff answers.txt
+
+Update model answers
+$ ./aoc > answers.txt
