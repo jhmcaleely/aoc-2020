@@ -45,6 +45,24 @@
 	  collect (parse-record line))))
 
 
+(defun output-count (part test-count valid-record)
+  (let
+      ((test-input (read-password-records "02.test-input.txt"))
+       (sample-input (read-password-records "02.input.txt"))
+       (part-label (format nil "Day 2, part ~a:" part)))
+
+    (labels
+	((count-valid (input)
+	   (count t (map 'list valid-record input))))
+
+      (when (/= test-count
+		(count-valid test-input))
+	(error "~a password count not matched" part-label))
+
+      (format t "~a ~a~%" part-label
+	      (count-valid sample-input)))))
+
+
 (defun valid-password1 (password-record)
   (let* ((lowest (first password-record))
 	(highest (second password-record))
@@ -56,11 +74,8 @@
      (>= highest char-count))))
 
 
-(= 2 (count t (map 'list
-		   #'valid-password1 (read-password-records "02.test-input.txt"))))
+(output-count 1 2 #'valid-password1)
 
-(format t "Day 2, part 1: ~a~%"
-	(count t (map 'list #'valid-password1 (read-password-records "02.input.txt"))))
 
 ;; While it appears you validated the passwords correctly, they don't
 ;; seem to be what the Official Toboggan Corporate Authentication
@@ -90,9 +105,11 @@
 ;; How many passwords are valid according to the new interpretation of
 ;; the policies?
 
+
 (defun char-at-position (password position)
   (let ((index (- position 1)))
     (char password index)))
+
 
 (defun valid-password2 (password-record)
   (let* ((position1 (first password-record))
@@ -103,9 +120,5 @@
 	  (eql character (char-at-position password position1))
 	  (eql character (char-at-position password position2))))))
 
-(unless (= 1 (count t (map 'list
-			   #'valid-password2 (read-password-records "02.test-input.txt"))))
-  (error "test count failed"))
 
-(format t "Day 2, part 2: ~a~%"
-	(count t (map 'list #'valid-password2 (read-password-records "02.input.txt"))))
+(output-count 2 1 #'valid-password2)
