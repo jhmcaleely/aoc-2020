@@ -23,6 +23,7 @@
 ;;
 ;; How many passwords are valid according to their policies?
 
+
 (defun parse-record (line)
   (let
       ((min (parse-integer line
@@ -36,6 +37,14 @@
     (format nil "~a ~a: ~a ~a" min max rule-char password)
     (list min max rule-char password)))
 
+
+(defun read-password-records (filename)
+  (with-open-file (input filename :direction :input)
+    (loop for line = (read-line input nil)
+	  while line
+	  collect (parse-record line))))
+
+
 (defun valid-password1 (password-record)
   (let* ((lowest (first password-record))
 	(highest (second password-record))
@@ -46,11 +55,6 @@
      (<= lowest char-count)
      (>= highest char-count))))
 
-(defun read-password-records (filename)
-  (with-open-file (input filename :direction :input)
-    (loop for line = (read-line input nil)
-	  while line
-	  collect (parse-record line))))
 
 (= 2 (count t (map 'list
 		   #'valid-password1 (read-password-records "02.test-input.txt"))))
