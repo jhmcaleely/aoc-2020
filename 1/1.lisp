@@ -61,7 +61,7 @@
 					; Evaluate test case
 	(when (/= test-product
 		  (matching-product test-input search))
-	  (error "Day 1, test case ~a failed~%" part))
+	  (error "Day 1, test case ~a failed" part))
 					; Output answer
 	(format t
 		"Day 1, part ~a: ~a~%"
