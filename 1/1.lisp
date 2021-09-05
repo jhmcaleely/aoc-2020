@@ -59,7 +59,7 @@
 
 
 ;; 787776
-(print (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-pair-if))
+(format t "Day 1, part 1: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-pair-if))
 
 ;; The Elves in accounting are thankful for your help one of them even
 ;; offers you a starfish coin they had left over from a past
@@ -91,4 +91,4 @@
 
 
 ;; 262738554
-(print (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-triple-if))
+(format t "Day 1, part 2: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-triple-if))

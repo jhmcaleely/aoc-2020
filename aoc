@@ -1,4 +1,4 @@
 #!/bin/bash
-pushd 1
-ccl -l 1.lisp
-popd
+pushd 1 > /dev/null
+ccl -l 1.lisp -e '(ccl:quit)'
+popd > /dev/null
