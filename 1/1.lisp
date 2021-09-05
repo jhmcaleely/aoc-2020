@@ -58,7 +58,6 @@
   (error "Test case failed"))
 
 
-;; 787776
 (format t "Day 1, part 1: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-pair-if))
 
 ;; The Elves in accounting are thankful for your help one of them even
@@ -90,5 +89,4 @@
   (error "Part 2 test case failed"))
 
 
-;; 262738554
 (format t "Day 1, part 2: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-triple-if))

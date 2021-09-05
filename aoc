@@ -1,4 +1,5 @@
 #!/bin/bash
+# Use ./aoc > answers.txt to update model answers
 pushd 1 > /dev/null
 ccl -l 1.lisp -e '(ccl:quit)'
 popd > /dev/null
