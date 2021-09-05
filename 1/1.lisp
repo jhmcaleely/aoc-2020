@@ -50,8 +50,8 @@
        (sample-input (read-numbers-as-list "input.txt")))
 
     (labels
-	((matching-product (input find-sum)
-	   (let ((match (funcall find-sum input)))
+	((matching-product (input search)
+	   (let ((match (funcall search input)))
 	     (when match
 	       (reduce #'* match)))))
 
@@ -61,7 +61,7 @@
 					; Evaluate test case
 	(when (/= test-product
 		  (matching-product test-input search))
-	  (error "Day 1, test case ~a failed" part))
+	  (error "Day 1, part ~a: product not matched" part))
 					; Output answer
 	(format t
 		"Day 1, part ~a: ~a~%"
