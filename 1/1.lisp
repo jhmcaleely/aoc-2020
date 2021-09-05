@@ -34,15 +34,6 @@
 	    (list head match)
 	    (%find-pair-if tail predicate-p))))))
 
-(defun find-pair-if (list n)
-  (%find-pair-if list (lambda (a b) (= (+ a b) n))))
-
-
-(defun compute-answer-x (input n predicate)
-  (let ((match (funcall predicate input n)))
-    (when match
-      (reduce #'* match))))
-
 
 ;; Read each line as an integer
 (defun read-numbers-as-list (filename)
@@ -52,13 +43,36 @@
 	  collect (parse-integer line))))
 
 
+(defun compute-for-target (input search)
+  (let ((match (funcall search input 2020)))
+    (when match
+      (reduce #'* match))))
+
+
+(defun compute-test-case (answer search)
+  (when (/= answer
+	    (compute-for-target '(1721 979 366 299 675 1456) search))
+    (error "Test case failed")))
+
+
+(defun compute-output (part search)
+  (format t
+	  "Day 1, part ~a: ~a~%"
+	  part
+	  (compute-for-target
+	   (read-numbers-as-list "input.txt") search)))
+
+
+(defun find-pair-if (list n)
+  (%find-pair-if list (lambda (a b) (= (+ a b) n))))
+
+
 ;; First evaluate the example
-(when (/= 514579
-	  (compute-answer-x '(1721 979 366 299 675 1456) 2020 #'find-pair-if))
-  (error "Test case failed"))
+(compute-test-case 514579 #'find-pair-if)
 
 
-(format t "Day 1, part 1: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-pair-if))
+(compute-output 1 #'find-pair-if)
+
 
 ;; The Elves in accounting are thankful for your help one of them even
 ;; offers you a starfish coin they had left over from a past
@@ -84,9 +98,6 @@
 	    (find-triple-if tail n))))))
 
 
-(when (/= 241861950
-	  (compute-answer-x '(1721 979 366 299 675 1456) 2020 #'find-triple-if))
-  (error "Part 2 test case failed"))
+(compute-test-case 241861950 #'find-triple-if)
 
-
-(format t "Day 1, part 2: ~a~%" (compute-answer-x (read-numbers-as-list "input.txt") 2020 #'find-triple-if))
+(compute-output 2 #'find-triple-if)
