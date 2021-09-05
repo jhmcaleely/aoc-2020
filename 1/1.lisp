@@ -43,37 +43,29 @@
 	  collect (parse-integer line))))
 
 
-(defun find-numbers (part test-product find-sum)
+(defun output-product (part test-product find-sum)
   (let
-      ((target 2020)
+      ((target-sum 2020)
        (test-input '(1721 979 366 299 675 1456))
        (sample-input (read-numbers-as-list "input.txt")))
 
     (labels
-	((matching-product (input search)
-	   (let ((match (funcall search input)))
-	     (when match
-	       (reduce #'* match)))))
-
-      (let
-	  ((search (lambda (input) (funcall find-sum target input))))
-
+	((find-product (input)
+	   (reduce #'* (funcall find-sum target-sum input))))
 					; Evaluate test case
-	(when (/= test-product
-		  (matching-product test-input search))
-	  (error "Day 1, part ~a: product not matched" part))
+      (when (/= test-product
+		(find-product test-input))
+	(error "Day 1, part ~a: product not matched" part))
 					; Output answer
-	(format t
-		"Day 1, part ~a: ~a~%"
-		part
-		(matching-product sample-input search))))))
+      (format t "Day 1, part ~a: ~a~%" part
+	      (find-product sample-input)))))
 
 
 (defun find-pair-sum (n list)
   (find-pair-if list (lambda (a b) (= (+ a b) n))))
 
 
-(find-numbers 1 514579 #'find-pair-sum)
+(output-product 1 514579 #'find-pair-sum)
 
 
 ;; The Elves in accounting are thankful for your help one of them even
@@ -100,4 +92,4 @@
 	    (find-triple-sum n tail))))))
 
 
-(find-numbers 2 241861950 #'find-triple-sum)
+(output-product 2 241861950 #'find-triple-sum)
