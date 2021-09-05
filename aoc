@@ -3,3 +3,4 @@
 pushd 1 > /dev/null
 ccl -l 1.lisp -e '(ccl:quit)'
 popd > /dev/null
+ccl -l 02.lisp -e '(ccl:quit)'

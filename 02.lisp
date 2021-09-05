@@ -22,3 +22,38 @@
 ;; nine c, both within the limits of their respective policies.
 ;;
 ;; How many passwords are valid according to their policies?
+
+(defun parse-line (line)
+  (let
+      ((min (parse-integer line
+			   :end (position #\- line)))
+       (max (parse-integer line
+			   :start (+ 1 (position #\- line))
+			   :end (position #\Space line)))
+       (rule-char (char line
+			(+ 1 (position #\Space line))))
+       (password (subseq line (+ 2 (position #\: line)))))
+    (format nil "~a ~a: ~a ~a" min max rule-char password)
+    (list min max rule-char password)))
+
+(defun valid-password (password-record)
+  (let* ((lowest (first password-record))
+	(highest (second password-record))
+	(character (third password-record))
+	(password (fourth password-record))
+	(char-count (count character password)))
+    (and
+     (<= lowest char-count)
+     (>= highest char-count))))
+
+(defun read-password-records (filename)
+  (with-open-file (input filename :direction :input)
+    (loop for line = (read-line input nil)
+	  while line
+	  collect (parse-line line))))
+
+(= 2 (count t (map 'list
+		   #'valid-password (read-password-records "02.test-input.txt"))))
+
+(format t "Day 2, part 1: ~a~%"
+	(count t (map 'list #'valid-password (read-password-records "02.input.txt"))))
