@@ -25,14 +25,14 @@
 
 
 ;; Recursively search pairs in a list that match the supplied predicate
-(defun %find-pair-if (list predicate-p)
+(defun find-pair-if (list predicate-p)
   (let ((head (first list))
 	(tail (rest list)))
     (when tail
       (let ((match (find-if (lambda (a) (funcall predicate-p head a)) tail)))
 	(if match
 	    (list head match)
-	    (%find-pair-if tail predicate-p))))))
+	    (find-pair-if tail predicate-p))))))
 
 
 ;; Read each line as an integer
@@ -44,7 +44,7 @@
 
 
 (defun compute-for-target (input search)
-  (let ((match (funcall search input 2020)))
+  (let ((match (funcall search 2020 input)))
     (when match
       (reduce #'* match))))
 
@@ -63,15 +63,15 @@
 	   (read-numbers-as-list "input.txt") search)))
 
 
-(defun find-pair-if (list n)
-  (%find-pair-if list (lambda (a b) (= (+ a b) n))))
+(defun find-pair-sum (n list)
+  (find-pair-if list (lambda (a b) (= (+ a b) n))))
 
 
 ;; First evaluate the example
-(compute-test-case 514579 #'find-pair-if)
+(compute-test-case 514579 #'find-pair-sum)
 
 
-(compute-output 1 #'find-pair-if)
+(compute-output 1 #'find-pair-sum)
 
 
 ;; The Elves in accounting are thankful for your help one of them even
@@ -87,17 +87,17 @@
 ;; that sum to 2020?
 
 
-(defun find-triple-if (list n)
+(defun find-triple-sum (n list)
   (let* ((one (first list))
 	 (remainder (- n one))
 	 (tail (rest list)))
     (when (and tail (< 0 remainder))
-      (let ((match (find-pair-if tail remainder)))
+      (let ((match (find-pair-sum remainder tail)))
 	(if match
 	    (list one (first match) (second match))
-	    (find-triple-if tail n))))))
+	    (find-triple-sum n tail))))))
 
 
-(compute-test-case 241861950 #'find-triple-if)
+(compute-test-case 241861950 #'find-triple-sum)
 
-(compute-output 2 #'find-triple-if)
+(compute-output 2 #'find-triple-sum)
