@@ -48,7 +48,7 @@
       ((target-sum 2020)
        (test-input '(1721 979 366 299 675 1456))
        (sample-input (read-numbers-as-list "input.txt"))
-       (test-label (format nil "Day 1, part ~a:" part)))
+       (part-label (format nil "Day 1, part ~a:" part)))
 
     (labels
 	((find-product (input)
@@ -56,9 +56,9 @@
 					; Evaluate test case
       (when (/= test-product
 		(find-product test-input))
-	(error "~a product not matched" test-label))
+	(error "~a product not matched" part-label))
 					; Output answer
-      (format t "~a ~a~%" test-label
+      (format t "~a ~a~%" part-label
 	      (find-product sample-input)))))
 
 
