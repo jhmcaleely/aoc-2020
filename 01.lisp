@@ -47,7 +47,7 @@
   (let
       ((target-sum 2020)
        (test-input '(1721 979 366 299 675 1456))
-       (sample-input (read-numbers-as-list "input.txt"))
+       (sample-input (read-numbers-as-list "01.input.txt"))
        (part-label (format nil "Day 1, part ~a:" part)))
 
     (labels
