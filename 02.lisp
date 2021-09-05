@@ -23,7 +23,7 @@
 ;;
 ;; How many passwords are valid according to their policies?
 
-(defun parse-line (line)
+(defun parse-record (line)
   (let
       ((min (parse-integer line
 			   :end (position #\- line)))
@@ -50,7 +50,7 @@
   (with-open-file (input filename :direction :input)
     (loop for line = (read-line input nil)
 	  while line
-	  collect (parse-line line))))
+	  collect (parse-record line))))
 
 (= 2 (count t (map 'list
 		   #'valid-password1 (read-password-records "02.test-input.txt"))))
@@ -86,7 +86,7 @@
 ;; How many passwords are valid according to the new interpretation of
 ;; the policies?
 
-(defun safe-1-char (password position)
+(defun char-at-position (password position)
   (let ((index (- position 1)))
     (char password index)))
 
@@ -95,9 +95,9 @@
 	 (position2 (second password-record))
 	 (character (third password-record))
 	 (password (fourth password-record)))
-    (not (equalp
-	  (equalp character (safe-1-char password position1))
-	  (equalp character (safe-1-char password position2))))))
+    (not (eq
+	  (eql character (char-at-position password position1))
+	  (eql character (char-at-position password position2))))))
 
 (unless (= 1 (count t (map 'list
 			   #'valid-password2 (read-password-records "02.test-input.txt"))))
