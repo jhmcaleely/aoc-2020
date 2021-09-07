@@ -68,3 +68,38 @@
 ;;
 ;; Starting at the top-left corner of your map and following a slope
 ;; of right 3 and down 1, how many trees would you encounter?
+
+
+(defun parse-row (line)
+  line)
+  
+
+
+(defun read-tree-map (filename)
+  (with-open-file (input filename :direction :input)
+    (loop for line = (read-line input nil)
+	  while line
+	  collect line)))
+
+(defparameter *map* (coerce (read-tree-map "03.input.txt") 'vector))
+
+(defun height ()
+  (length *map*))
+
+(defun width ()
+  (length (aref *map* 0)))
+
+(defun at-position (x y)
+  (char (aref *map* y) x))
+
+(let
+    ((result (do ((x 3 (mod (+ 3 x) (width)))
+		  (y 1 (+ 1 y))
+		  (n 0))
+		 ((>= y (height)) n)
+	       (progn
+					;    (format t "hello: (~a,~a):~a [~a]~%" x y (at-position x y) n)
+		 (if (eql #\# (at-position x y))
+		     (incf n))))))
+
+  (format t "Day 3, part 1: ~a" result))
