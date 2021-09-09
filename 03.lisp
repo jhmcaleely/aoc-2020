@@ -89,10 +89,9 @@
     map))
 
 
-(defun count-trees-on-slope (across down filename)
-  (let* ((tree-map (make-tree-map filename))
-	 (map-width (array-dimension tree-map 0))
-	 (map-height (array-dimension tree-map 1)))
+(defun count-trees-on-slope (across down tree-map)
+  (let ((map-width (array-dimension tree-map 0))
+	(map-height (array-dimension tree-map 1)))
 
     (do ((x across (mod (+ across x) map-width))
 	 (y down (+ down y))
@@ -101,7 +100,22 @@
       (if (eql #\# (aref tree-map x y))
 	  (incf n)))))
 
-(format t "Day 3, part 1: ~a" (count-trees-on-slope 3 1 "03.input.txt"))
+
+(defun output-count (part test-count)
+  (let
+      ((test-map (make-tree-map "03.test-input.txt"))
+       (sample-map (make-tree-map "03.input.txt"))
+       (part-label (format nil "Day 3, part ~a:" part)))
+
+    (when (/= test-count
+	      (count-trees-on-slope 3 1 test-map))
+      (error "~a tree count not matched" part-label))
+
+    (format t "~a ~a~%" part-label
+	    (count-trees-on-slope 3 1 sample-map))))
+
+
+(output-count 1 7)
 
 ;; Time to check the rest of the slopes - you need to minimize the
 ;; probability of a sudden arboreal stop, after all.
@@ -122,3 +136,31 @@
 ;;
 ;; What do you get if you multiply together the number of trees
 ;; encountered on each of the listed slopes?
+
+
+(defun output-product (part test-product)
+  (let
+      ((test-map (make-tree-map "03.test-input.txt"))
+       (sample-map (make-tree-map "03.input.txt"))
+       (part-label (format nil "Day 3, part ~a:" part))
+       (test-slopes '((1 1) (3 1) (5 1) (7 1) (1 2))))
+
+    (labels
+	((compute-product (input)
+	   (reduce #'*
+		   (map 'list
+			#'(lambda (x)
+			    (count-trees-on-slope (first x)
+						  (second x)
+						  input))
+			test-slopes))))
+
+      (when (/= test-product
+		(compute-product test-map))
+	(error "~a product not matched" part-label))
+
+      (format t "~a ~a~%" part-label
+	      (compute-product sample-map)))))
+
+
+(output-product 2 336)
