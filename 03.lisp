@@ -70,39 +70,38 @@
 ;; of right 3 and down 1, how many trees would you encounter?
 
 
-(defun parse-row (line)
-  line)
-  
-
-
 (defun read-tree-map (filename)
   (with-open-file (input filename :direction :input)
     (loop for line = (read-line input nil)
 	  while line
 	  collect line)))
 
-(defparameter *map* (coerce (read-tree-map "03.input.txt") 'vector))
+(defun make-tree-map (filename)
+  (let* ((map-elements (read-tree-map filename))
+	 (height (length map-elements))
+	 (width (length (first map-elements)))
+	 (map (make-array `(,width ,height))))
+    (let ((y 0))
+      (dolist (line map-elements)
+	(dotimes (x width)
+	  (setf (aref map x y) (char line x)))
+	(incf y)))
+    map))
 
-(defun height ()
-  (length *map*))
 
-(defun width ()
-  (length (aref *map* 0)))
+(defun count-trees-on-slope (across down filename)
+  (let* ((tree-map (make-tree-map filename))
+	 (map-width (array-dimension tree-map 0))
+	 (map-height (array-dimension tree-map 1)))
 
-(defun at-position (x y)
-  (char (aref *map* y) x))
+    (do ((x across (mod (+ across x) map-width))
+	 (y down (+ down y))
+	 (n 0))
+	((>= y map-height) n)
+      (if (eql #\# (aref tree-map x y))
+	  (incf n)))))
 
-(let
-    ((result (do ((x 3 (mod (+ 3 x) (width)))
-		  (y 1 (+ 1 y))
-		  (n 0))
-		 ((>= y (height)) n)
-	       (progn
-					;    (format t "hello: (~a,~a):~a [~a]~%" x y (at-position x y) n)
-		 (if (eql #\# (at-position x y))
-		     (incf n))))))
-
-  (format t "Day 3, part 1: ~a" result))
+(format t "Day 3, part 1: ~a" (count-trees-on-slope 3 1 "03.input.txt"))
 
 ;; Time to check the rest of the slopes - you need to minimize the
 ;; probability of a sudden arboreal stop, after all.
