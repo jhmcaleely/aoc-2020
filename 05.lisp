@@ -60,3 +60,28 @@
 ;;
 ;; As a sanity check, look through your list of boarding passes. What
 ;; is the highest seat ID on a boarding pass?
+
+(defun read-boarding-passes (filename)
+  (with-open-file (input filename :direction :input)
+    (loop for line = (read-line input nil)
+	  while line
+	  collect line)))
+
+(defun seat-id (boarding-pass)
+  42)
+
+(let
+    ((test-input '("FBFBBFFRLR"))
+     (sample-input (read-boarding-passes "05.input.txt"))
+     (part-label (format nil "Day 5, part 1:")))
+
+  (labels
+      ((max-id (input)
+	 (reduce #'max (map 'list #'seat-id input))))
+
+  (when (/= 357
+	    (seat-id (first test-input)))
+    (error "~a test seat id mismatch" part-label))
+
+  (format t "~a ~a~%" part-label
+	  (max-id sample-input))))
