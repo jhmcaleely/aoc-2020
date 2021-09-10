@@ -130,3 +130,19 @@
 ;; IDs +1 and -1 from yours will be in your list.
 ;;
 ;; What is the ID of your seat?
+
+(let*
+    ((sample-input (read-boarding-passes "05.input.txt"))
+     (part-label (format nil "Day 5, part 2:"))
+     (occupied-seats (sort (map 'list #'seat-id sample-input) #'<)))
+
+  (labels
+      ((find-seat ()
+	 (do
+	  ((n 0 (1+ n))
+	   (seat-array (coerce occupied-seats 'vector)))
+	  ((/= (1+ (aref seat-array n))
+	       (aref seat-array (1+ n))) (1+ (aref seat-array n))))))
+
+    (format t "~a ~a~%" part-label
+	    (find-seat))))
