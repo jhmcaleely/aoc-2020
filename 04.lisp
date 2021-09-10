@@ -65,3 +65,71 @@
 ;; Count the number of valid passports - those that have all required
 ;; fields. Treat cid as optional. In your batch file, how many
 ;; passports are valid?
+
+(defun read-passport-strings (filename)
+  (with-open-file (input filename :direction :input)
+    (do
+     ((line (read-line input nil) (read-line input nil))
+      (passport nil)
+      (passports nil))
+     ((not line) (push passport passports))
+      (if (equalp line "")
+	  (progn
+	    (setf passports (push passport passports))
+	    (setf passport nil))
+	  (if passport
+	      (setf passport (concatenate 'string passport " " line))
+	      (setf passport line))))))
+
+(defun split-records (character string)
+  (do
+   ((next-space (position character string) (position character string :start (1+ next-space)))
+    (last-space 0 (1+ next-space))
+    (records nil))
+   ((not next-space) (nreverse (push (subseq string last-space next-space) records)))
+    (setf records (push (subseq string last-space next-space) records))))
+
+(defun read-field (string)
+  (let ((field (split-records #\: string)))
+    (cons (first field) (second field))))
+
+(defun passport-fields (string)
+  (split-records #\Space string))
+
+
+(defun make-passport (fields)
+    (map 'list #'read-field fields))
+
+
+(defun read-passports (filename)
+  (let*
+      ((passport-strings (read-passport-strings filename))
+       (passport-fields (map 'list #'passport-fields passport-strings))
+       (passport-records (map 'list #'make-passport passport-fields)))
+    passport-records))
+
+(defun valid-passport-p (passport)
+  (let ((fields '("byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid")))
+    (every #'identity
+	   (map 'list
+		#'(lambda (x) (assoc x passport :test #'equalp))
+		fields))))
+
+(let
+    ((test-input (read-passports "04.test-input.txt"))
+     (sample-input (read-passports "04.input.txt"))
+     (part-label (format nil "Day 4, part 1:")))
+
+  (labels
+      ((count-valid (input)
+	 (count t
+		(map 'list
+		     #'valid-passport-p
+		     input))))
+
+    (when (/= 2
+	      (count-valid test-input))
+      (error "~a valid pasport count not matched" part-label))
+
+    (format t "~a ~a~%" part-label
+	    (count-valid sample-input))))
