@@ -231,54 +231,55 @@
 ;; batch file, how many passports are valid?
 
 
-(defun valid-digits (string len)
-  (and
-   (= (length string) len)
-   (every #'digit-char-p string)))
-
-(defun valid-hex-digits (string len)
-  (and
-   (= (length string) len)
-   (every #'(lambda (x) (digit-char-p x 16)) string)))
-
 (defun in-range (num min max)
   (when (and (>= num min)
 	     (<= num max))
     num))
 
-(defun valid-number (string min max)
-  (in-range (parse-integer string) min max))
+
+(defun valid-numberfield (control field)
+  (and
+   (= (length control) (length field))
+   (every #'(lambda (c f)
+	      (cond
+		((equalp c #\n) (digit-char-p f))
+		((equalp c #\h) (digit-char-p f 16))
+		(t (equalp c f))))
+	  control
+	  field)))
+
 
 (defparameter *fields* nil)
+
 
 (defmacro defvalidatedfield (name validator)
   `(push (cons ,name ,validator) *fields*))
 
-(defmacro defnumberfield (name length &optional min max)
+
+(defmacro defnumberfield (name control &optional min max)
   (if (and min max)
+
       `(defvalidatedfield ,name
 	   #'(lambda (string)
-	       (and (valid-digits string ,length)
-		    (valid-number string ,min ,max))))
+	       (and (valid-numberfield ,control string)
+		    (in-range (parse-integer string) ,min ,max))))
+
       `(defvalidatedfield ,name
 	   #'(lambda (string)
-	       (valid-digits string ,length)))))
+	       (valid-numberfield ,control string)))))
 
-(defnumberfield "byr" 4 1920 2002)
 
-(defnumberfield "iyr" 4 2010 2020)
+(defnumberfield "byr" "nnnn" 1920 2002)
 
-(defnumberfield "eyr" 4 2020 2030)
+(defnumberfield "iyr" "nnnn" 2010 2020)
 
-(defnumberfield "pid" 9)
+(defnumberfield "eyr" "nnnn" 2020 2030)
+
+(defnumberfield "pid" "nnnnnnnnn")
+
+(defnumberfield "hcl" "#hhhhhh")
 
 (defvalidatedfield "cid" nil)
-
-(defvalidatedfield "hcl"
-    #'(lambda (string)
-	(and
-	 (eql #\# (char string 0))
-	 (valid-hex-digits (subseq string 1) 6))))
 
 (defvalidatedfield "ecl"
     #'(lambda (string)
@@ -298,10 +299,10 @@
 
 
 (defun valid-field-p (field)
-  (let ((test (assoc (car field) *fields* :test #'equalp)))
-    (when test
-      (if (cdr test)
-	  (funcall (cdr test) (cdr field))
+  (let ((field-spec (assoc (car field) *fields* :test #'equalp)))
+    (when field-spec
+      (if (cdr field-spec)
+	  (funcall (cdr field-spec) (cdr field))
 	  t))))
 
 
