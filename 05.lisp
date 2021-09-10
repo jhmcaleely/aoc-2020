@@ -67,8 +67,37 @@
 	  while line
 	  collect line)))
 
+(defun next-half-range (range char lower upper)
+  (let* ((min (car range))
+	 (max (cdr range))
+	 (delta (/ (- max min) 2)))
+
+    (cond
+      ((equalp char lower) `(,min . ,(+ min (floor delta))))
+      ((equalp char upper) `(,(+ min (ceiling delta)) . ,max)))))
+
+(defun compute-row (boarding-pass)
+  (let ((range '(0 . 127)))
+    (dotimes (i 7)
+      (setf
+       range
+       (next-half-range range (char boarding-pass i) #\F #\B)))
+    (car range)))
+
+(defun compute-col (boarding-pass)
+  (let ((range '(0 . 7)))
+    (dotimes (i 3)
+      (setf
+       range
+       (next-half-range range (char boarding-pass (+ 7 i)) #\L #\R)))
+    (car range)))
+
+(defun seat-location (boarding-pass)
+  `(,(compute-row boarding-pass) . ,(compute-col boarding-pass)))
+
 (defun seat-id (boarding-pass)
-  42)
+  (let ((location (seat-location boarding-pass)))
+    (+ (* (car location) 8) (cdr location))))
 
 (let
     ((test-input '("FBFBBFFRLR"))
