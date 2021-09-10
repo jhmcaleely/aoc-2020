@@ -1,5 +1,2 @@
 #!/bin/bash
-for DAY in 01 02 03 04
-do
-    ccl -l $DAY.lisp -e '(ccl:quit)'
-done
+ccl -l aoc.lisp -e '(ccl:quit)'

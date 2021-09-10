@@ -109,12 +109,32 @@
     passport-records))
 
 
-(defun valid-passport-p (passport)
-  (let ((fields '("byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid")))
-    (every #'identity
-	   (map 'list
-		#'(lambda (x) (assoc x passport :test #'equalp))
-		fields))))
+(defparameter *fields1* nil)
+
+
+(defmacro deffield1 (name &optional (mandatory t))
+  `(push (cons ,name ,mandatory) *fields1*))
+
+
+(deffield1 "byr")
+(deffield1 "iyr")
+(deffield1 "eyr")
+(deffield1 "hgt")
+(deffield1 "hcl")
+(deffield1 "ecl")
+(deffield1 "pid")
+(deffield1 "cid" nil)
+
+
+(defun mandatory-fields ()
+  (mapcan #'(lambda (field) (when (cdr field) (list (car field)))) *fields1*))
+
+
+(defun mandatory-fields-present-p (passport)
+  (every #'identity
+	 (map 'list
+	      #'(lambda (x) (assoc x passport :test #'equalp))
+	      (mandatory-fields))))
 
 (let
     ((test-input (read-passports "04.test-input.txt"))
@@ -125,7 +145,7 @@
       ((count-valid (input)
 	 (count t
 		(map 'list
-		     #'valid-passport-p
+		     #'mandatory-fields-present-p
 		     input))))
 
     (when (/= 2
@@ -210,8 +230,6 @@
 ;; fields and valid values. Continue to treat cid as optional. In your
 ;; batch file, how many passports are valid?
 
-(defparameter *fields* nil)
-
 
 (defun valid-digits (string len)
   (and
@@ -231,57 +249,52 @@
 (defun valid-number (string min max)
   (in-range (parse-integer string) min max))
 
-(push (cons "byr"
-	    #'(lambda (string)
-		(and (valid-digits string 4)
-		     (valid-number string 1920 2002))))
-      *fields*)
+(defparameter *fields* nil)
 
-(push (cons "iyr"
-	    #'(lambda (string)
-		(and (valid-digits string 4)
-		     (valid-number string 2010 2020))))
-      *fields*)
+(defmacro defvalidatedfield (name validator)
+  `(push (cons ,name ,validator) *fields*))
 
-(push (cons "eyr"
-	    #'(lambda (string)
-		(and (valid-digits string 4)
-		     (valid-number string 2020 2030))))
-      *fields*)
+(defmacro defnumberfield (name length &optional min max)
+  (if (and min max)
+      `(defvalidatedfield ,name
+	   #'(lambda (string)
+	       (and (valid-digits string ,length)
+		    (valid-number string ,min ,max))))
+      `(defvalidatedfield ,name
+	   #'(lambda (string)
+	       (valid-digits string ,length)))))
 
-(push (cons "pid"
-	    #'(lambda (string)
-		(valid-digits string 9)))
-      *fields*)
+(defnumberfield "byr" 4 1920 2002)
 
-(push (cons "cid"
-	    nil)
-      *fields*)
+(defnumberfield "iyr" 4 2010 2020)
 
-(push (cons "hcl"
-	    #'(lambda (string)
-		(and
-		 (eql #\# (char string 0))
-		 (valid-hex-digits (subseq string 1) 6))))
-      *fields*)
+(defnumberfield "eyr" 4 2020 2030)
 
-(push (cons "ecl"
-	    #'(lambda (string)
-		(find string '("amb" "blu" "brn" "gry" "grn" "hzl" "oth") :test #'equalp)))
-      *fields*)
+(defnumberfield "pid" 9)
 
-(push (cons "hgt"
-	    #'(lambda (string)
-		(let ((unit-start (position-if-not #'digit-char-p string)))
-		  (when unit-start
-		    (let
-		       ((unit (subseq string unit-start))
-			(num (parse-integer (subseq string 0 unit-start))))
-		      (cond
-			((equalp unit "in") (in-range num 59 76))
-			((equalp unit "cm") (in-range num 150 193))
-			(t nil)))))))
-      *fields*)
+(defvalidatedfield "cid" nil)
+
+(defvalidatedfield "hcl"
+    #'(lambda (string)
+	(and
+	 (eql #\# (char string 0))
+	 (valid-hex-digits (subseq string 1) 6))))
+
+(defvalidatedfield "ecl"
+    #'(lambda (string)
+	(find string '("amb" "blu" "brn" "gry" "grn" "hzl" "oth") :test #'equalp)))
+
+(defvalidatedfield "hgt"
+    #'(lambda (string)
+	(let ((unit-start (position-if-not #'digit-char-p string)))
+	  (when unit-start
+	    (let
+		((unit (subseq string unit-start))
+		 (num (parse-integer (subseq string 0 unit-start))))
+	      (cond
+		((equalp unit "in") (in-range num 59 76))
+		((equalp unit "cm") (in-range num 150 193))
+		(t nil)))))))
 
 
 (defun valid-field-p (field)
@@ -295,7 +308,7 @@
 (defun validated-passport-p (passport)
   (and
    (every #'identity (map 'list #'valid-field-p passport))
-   (valid-passport-p passport)))
+   (mandatory-fields-present-p passport)))
 
 
 (let
