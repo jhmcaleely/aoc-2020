@@ -209,3 +209,105 @@
 ;; Count the number of valid passports - those that have all required
 ;; fields and valid values. Continue to treat cid as optional. In your
 ;; batch file, how many passports are valid?
+
+(defparameter *fields* nil)
+
+
+(defun valid-digits (string len)
+  (and
+   (= (length string) len)
+   (every #'digit-char-p string)))
+
+(defun valid-hex-digits (string len)
+  (and
+   (= (length string) len)
+   (every #'(lambda (x) (digit-char-p x 16)) string)))
+
+(defun in-range (num min max)
+  (when (and (>= num min)
+	     (<= num max))
+    num))
+
+(defun valid-number (string min max)
+  (in-range (parse-integer string) min max))
+
+(push (cons "byr"
+	    #'(lambda (string)
+		(and (valid-digits string 4)
+		     (valid-number string 1920 2002))))
+      *fields*)
+
+(push (cons "iyr"
+	    #'(lambda (string)
+		(and (valid-digits string 4)
+		     (valid-number string 2010 2020))))
+      *fields*)
+
+(push (cons "eyr"
+	    #'(lambda (string)
+		(and (valid-digits string 4)
+		     (valid-number string 2020 2030))))
+      *fields*)
+
+(push (cons "pid"
+	    #'(lambda (string)
+		(valid-digits string 9)))
+      *fields*)
+
+(push (cons "cid"
+	    nil)
+      *fields*)
+
+(push (cons "hcl"
+	    #'(lambda (string)
+		(and
+		 (eql #\# (char string 0))
+		 (valid-hex-digits (subseq string 1) 6))))
+      *fields*)
+
+(push (cons "ecl"
+	    #'(lambda (string)
+		(find string '("amb" "blu" "brn" "gry" "grn" "hzl" "oth") :test #'equalp)))
+      *fields*)
+
+(push (cons "hgt"
+	    #'(lambda (string)
+		(let ((unit-start (position-if-not #'digit-char-p string)))
+		  (when unit-start
+		    (let
+		       ((unit (subseq string unit-start))
+			(num (parse-integer (subseq string 0 unit-start))))
+		      (cond
+			((equalp unit "in") (in-range num 59 76))
+			((equalp unit "cm") (in-range num 150 193))
+			(t nil)))))))
+      *fields*)
+
+
+(defun valid-field-p (field)
+  (let ((test (assoc (car field) *fields* :test #'equalp)))
+    (when test
+      (if (cdr test)
+	  (funcall (cdr test) (cdr field))
+	  t))))
+
+
+(defun validated-passport-p (passport)
+  (and
+   (every #'identity (map 'list #'valid-field-p passport))
+   (valid-passport-p passport)))
+
+
+(let
+    ((sample-input (read-passports "04.input.txt"))
+     (part-label (format nil "Day 4, part 2:")))
+
+  (labels
+      ((count-valid (input)
+	 (count t
+		(map 'list
+		     #'validated-passport-p
+		     input))))
+
+    (format t "~a ~a~%" part-label
+	    (count-valid sample-input))))

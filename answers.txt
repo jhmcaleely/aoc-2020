@@ -5,3 +5,4 @@ Day 2, part 2: 443
 Day 3, part 1: 292
 Day 3, part 2: 9354744432
 Day 4, part 1: 264
+Day 4, part 2: 224
