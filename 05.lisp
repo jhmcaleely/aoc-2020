@@ -61,11 +61,6 @@
 ;; As a sanity check, look through your list of boarding passes. What
 ;; is the highest seat ID on a boarding pass?
 
-(defun read-boarding-passes (filename)
-  (with-open-file (input filename :direction :input)
-    (loop for line = (read-line input nil)
-	  while line
-	  collect line)))
 
 (defun next-half-range (range char lower upper)
   (let* ((min (car range))
@@ -101,7 +96,7 @@
 
 (let
     ((test-input '("FBFBBFFRLR"))
-     (sample-input (read-boarding-passes "05.input.txt"))
+     (sample-input (read-line-records "05.input.txt"))
      (part-label (format nil "Day 5, part 1:")))
 
   (labels
@@ -132,7 +127,7 @@
 ;; What is the ID of your seat?
 
 (let*
-    ((sample-input (read-boarding-passes "05.input.txt"))
+    ((sample-input (read-line-records "05.input.txt"))
      (part-label (format nil "Day 5, part 2:"))
      (occupied-seats (sort (map 'list #'seat-id sample-input) #'<)))
 

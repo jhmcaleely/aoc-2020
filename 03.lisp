@@ -70,14 +70,8 @@
 ;; of right 3 and down 1, how many trees would you encounter?
 
 
-(defun read-tree-map (filename)
-  (with-open-file (input filename :direction :input)
-    (loop for line = (read-line input nil)
-	  while line
-	  collect line)))
-
 (defun make-tree-map (filename)
-  (let* ((map-elements (read-tree-map filename))
+  (let* ((map-elements (read-line-records filename))
 	 (height (length map-elements))
 	 (width (length (first map-elements)))
 	 (map (make-array `(,width ,height))))
