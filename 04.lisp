@@ -66,20 +66,6 @@
 ;; fields. Treat cid as optional. In your batch file, how many
 ;; passports are valid?
 
-(defun read-passport-strings (filename)
-  (with-open-file (input filename :direction :input)
-    (do
-     ((line (read-line input nil) (read-line input nil))
-      (passport nil)
-      (passports nil))
-     ((not line) (push passport passports))
-      (if (equalp line "")
-	  (progn
-	    (setf passports (push passport passports))
-	    (setf passport nil))
-	  (if passport
-	      (setf passport (concatenate 'string passport " " line))
-	      (setf passport line))))))
 
 (defun split-records (character string)
   (do
@@ -103,7 +89,7 @@
 
 (defun read-passports (filename)
   (let*
-      ((passport-strings (read-passport-strings filename))
+      ((passport-strings (read-multiline-string-records filename))
        (passport-fields (map 'list #'passport-fields passport-strings))
        (passport-records (map 'list #'make-passport passport-fields)))
     passport-records))

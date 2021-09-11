@@ -66,4 +66,27 @@
 ;; For each group, count the number of questions to which anyone
 ;; answered "yes". What is the sum of those counts?
 
-(format t "Day 6, part 1: ")
+
+(let
+    ((test-input (read-multiline-string-records "06.test-input.txt"))
+     (sample-input (read-multiline-string-records "06.input.txt"))
+     (part-label (format nil "Day 6, part 1:")))
+
+  (labels
+      ((answers-in-group (group-answer)
+	 (remove-duplicates (remove #\Space group-answer)))
+
+       (group-results (group-answers)
+	 (map 'list #'answers-in-group group-answers))
+
+       (sum-answers (input)
+	 (reduce #'+
+		 (map 'list #'length
+		      (group-results input)))))
+
+    (when (/= 11
+	      (sum-answers test-input))
+      (error "~a answers don't add up" part-label))
+
+    (format t "~a ~a~%" part-label
+	    (sum-answers sample-input))))
