@@ -35,19 +35,11 @@
 	    (find-pair-if tail predicate-p))))))
 
 
-;; Read each line as an integer
-(defun read-numbers-as-list (filename)
-  (with-open-file (input filename :direction :input)
-    (loop for line = (read-line input nil)
-	  while line
-	  collect (parse-integer line))))
-
-
 (defun output-product (part test-product find-sum)
   (let
       ((target-sum 2020)
        (test-input '(1721 979 366 299 675 1456))
-       (sample-input (read-numbers-as-list "01.input.txt"))
+       (sample-input (read-parsed-line-records "01.input.txt" #'parse-integer))
        (part-label (format nil "Day 1, part ~a:" part)))
 
     (labels

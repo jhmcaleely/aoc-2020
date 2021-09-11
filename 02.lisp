@@ -38,17 +38,10 @@
     (list min max rule-char password)))
 
 
-(defun read-password-records (filename)
-  (with-open-file (input filename :direction :input)
-    (loop for line = (read-line input nil)
-	  while line
-	  collect (parse-record line))))
-
-
 (defun output-count (part test-count valid-record)
   (let
-      ((test-input (read-password-records "02.test-input.txt"))
-       (sample-input (read-password-records "02.input.txt"))
+      ((test-input (read-parsed-line-records "02.test-input.txt" #'parse-record))
+       (sample-input (read-parsed-line-records "02.input.txt" #'parse-record))
        (part-label (format nil "Day 2, part ~a:" part)))
 
     (labels
