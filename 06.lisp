@@ -140,3 +140,34 @@
 ;;
 ;; For each group, count the number of questions to which everyone
 ;; answered "yes". What is the sum of those counts?
+
+(let*
+    ((test-input (read-multiline-string-records "06.test-input.txt"))
+     (sample-input (read-multiline-string-records "06.input.txt"))
+     (part-label (format nil "Day 6, part 2:")))
+
+  (labels
+      ((answer-lists (input)
+	 (map 'list #'(lambda (x) (coerce x 'list))
+	      (split-records #\Space input)))
+
+       (group-common-answers (group-answer)
+	 (if (= 1 (length group-answer))
+	     (first group-answer)
+	     (reduce #'intersection group-answer)))
+
+       (common-answers (input)
+	 (map 'list #'group-common-answers
+	      (map 'list #'answer-lists input)))
+
+       (sum-answers (input)
+	 (reduce #'+
+		 (Map 'list #'length
+		      (common-answers input)))))
+
+    (when (/= 6
+	      (sum-answers test-input))
+      (error "~a answers don't add up" part-label))
+
+    (format t "~a ~a~%" part-label
+	    (sum-answers sample-input))))
