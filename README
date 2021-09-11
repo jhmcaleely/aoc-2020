@@ -4,11 +4,11 @@ https://adventofcode.com/2020
 
 Requires CCL, tested on Ubuntu 20.04.3 LTS (x86, 64-bit)
 
-Evaluate current answers
+Output current answers
 $ ./aoc
 
-Test against model answers
-$ ./aoc | diff answers.txt
+Test against model answers. No output is success
+$ ./aoc-test
 
 Update model answers
 $ ./aoc > answers.txt
