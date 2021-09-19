@@ -63,16 +63,12 @@
       `(,colour-name . ,count))))
 
 
-(defun parse-bag (input-bag)
-  (if (search "no other" input-bag)
-      '()
-      (parse-full-bag input-bag)))
-
-
-(defun parse-separated-records (input item parser)
-  (map 'list parser
-       (map 'list #'(lambda (x) (string-left-trim '(#\Space) x))
-	    (split-sequence item input))))
+(defun parse-record-list (input item parser)
+  (if (search "no other" input)		; special case the empty list
+      nil					
+      (map 'list parser	  ; map the parser over a cleaned set of items
+	   (map 'list #'(lambda (x) (string-left-trim '(#\Space) x))
+		(split-sequence item input)))))
 
 
 (defun parse-colour-and-contents (input-line)
@@ -83,28 +79,32 @@
        (contents-string (subseq input-line
 				(+ split-location
 				   (length split-token)))))
-    `(,colour . ,(parse-separated-records
+    `(,colour . ,(parse-record-list
 		  contents-string
-		  #\, #'parse-bag))))
+		  #\, #'parse-full-bag))))
 
 
 (defun read-rules (filename)
   (read-parsed-line-records filename #'parse-colour-and-contents))
 
 
-(defun bag-has-colour (bag-rule colour)
-  (let
-      ((bag-colour (car bag-rule))
-       (bag-contents (cdr bag-rule)))
+(defun bag-colour (bag-rule)
+  (car bag-rule))
 
-    (when (assoc colour bag-contents :test #'equalp)
-      bag-colour)))
+
+(defun bag-contents (bag-rule)
+  (cdr bag-rule))
+
+
+(defun bag-contains-colour (bag-rule colour)
+  (when (assoc colour (bag-contents bag-rule) :test #'equalp)
+    (bag-colour bag-rule)))
 
 
 (defun bags-which-contain (colour rules)
   (remove nil
 	  (map 'list
-	       #'(lambda (x) (bag-has-colour x colour))
+	       #'(lambda (x) (bag-contains-colour x colour))
 	       rules)))
 
 
@@ -179,3 +179,68 @@
 ;;
 ;; How many individual bags are required inside your single shiny gold
 ;; bag?
+
+
+(defun container-bags (rule)
+  (if (eq (bag-contents rule) nil)
+      0
+      (reduce #'+
+	      (map 'list
+		   #'cdr
+		   (bag-contents rule)))))
+
+
+(defun bag-rule (bag-colour rules)
+  (assoc bag-colour rules :test #'equalp))
+
+
+(defun all-contained-bags (bag-colour rules)
+  (let*
+      ((rule (bag-rule bag-colour rules))
+       (contents (bag-contents rule)))
+
+    (labels
+	((contained-bags ()
+	   (reduce #'+
+		   (map 'list
+			#'bags-within
+			contents)))
+
+	 (bags-within (bag)
+	   (* (cdr bag) (all-contained-bags (car bag) rules))))
+
+      (+ (container-bags rule)
+	 (contained-bags)))))
+
+
+(defun test-example-1 ()
+  (let ((test-rules (read-rules "07.test-input.txt")))
+    (labels
+	((test (colour count)
+	   (= (container-bags (bag-rule colour test-rules)) count)))
+
+      (and
+       (test "faded blue" 0)
+       (test "dotted black" 0)
+       (test "vibrant plum" 11)
+       (test "dark olive" 7)
+       (= 32 (all-contained-bags "shiny gold" test-rules))))))
+
+
+(defun test-example-2 ()
+  (let
+      ((test-rules (read-rules "07-2.test-input.txt")))
+    (= 126 (all-contained-bags "shiny gold" test-rules))))
+
+
+(unless (and
+	 (test-example-1)
+	 (test-example-2))
+  (error "self-test failed"))
+
+
+(let ((sample-rules (read-rules "07.input.txt"))
+      (part-label (format nil "Day 7, part 2:")))
+
+    (format t "~a ~a~%" part-label
+	    (all-contained-bags "shiny gold" sample-rules)))
