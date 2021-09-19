@@ -67,20 +67,12 @@
 ;; passports are valid?
 
 
-(defun split-records (character string)
-  (do
-   ((next-space (position character string) (position character string :start (1+ next-space)))
-    (last-space 0 (1+ next-space))
-    (records nil))
-   ((not next-space) (nreverse (push (subseq string last-space next-space) records)))
-    (setf records (push (subseq string last-space next-space) records))))
-
 (defun read-field (string)
-  (let ((field (split-records #\: string)))
+  (let ((field (split-sequence #\: string)))
     (cons (first field) (second field))))
 
 (defun passport-fields (string)
-  (split-records #\Space string))
+  (split-sequence #\Space string))
 
 
 (defun make-passport (fields)

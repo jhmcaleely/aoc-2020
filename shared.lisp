@@ -29,3 +29,24 @@
 	  (if record
 	      (setf record (concatenate 'string record " " line))
 	      (setf record line))))))
+
+
+(defun split-sequence (item sequence)
+  "spit a sequence into a list of subsequences that were separated by item"
+  (do
+   ((next-item (position item sequence)
+	       (position item sequence :start (1+ next-item)))
+    (last-item 0 (1+ next-item))
+    (subseqs nil))
+
+   ((not next-item)
+
+    (nreverse
+     (push
+      (subseq sequence last-item next-item)
+      subseqs)))
+
+    (setf
+     subseqs (push
+	      (subseq sequence last-item next-item)
+	      subseqs))))

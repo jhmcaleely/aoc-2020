@@ -149,7 +149,7 @@
   (labels
       ((answer-lists (input)
 	 (map 'list #'(lambda (x) (coerce x 'list))
-	      (split-records #\Space input)))
+	      (split-sequence #\Space input)))
 
        (group-common-answers (group-answer)
 	 (if (= 1 (length group-answer))
