@@ -48,3 +48,93 @@
 ;; How many bag colors can eventually contain at least one shiny gold
 ;; bag? (The list of rules is quite long; make sure you get all of
 ;; it.)
+
+
+(defun parse-full-bag (input-bag)
+  (multiple-value-bind (count remainder-start)
+      (parse-integer input-bag :junk-allowed t)
+    (let*
+	((colour-location
+	   (search " bag" input-bag))
+	 (colour-name
+	   (subseq input-bag
+		   (1+ remainder-start)
+		   colour-location)))
+      `(,colour-name . ,count))))
+
+
+(defun parse-bag (input-bag)
+  (if (search "no other" input-bag)
+      '()
+      (parse-full-bag input-bag)))
+
+
+(defun parse-separated-records (input item parser)
+  (map 'list parser
+       (map 'list #'(lambda (x) (string-left-trim '(#\Space) x))
+	    (split-sequence item input))))
+
+
+(defun parse-colour-and-contents (input-line)
+  (let*
+      ((split-token " bags contain ")
+       (split-location (search split-token input-line))
+       (colour (subseq input-line 0 split-location))
+       (contents-string (subseq input-line
+				(+ split-location
+				   (length split-token)))))
+    `(,colour . ,(parse-separated-records
+		  contents-string
+		  #\, #'parse-bag))))
+
+
+(defun read-rules (filename)
+  (read-parsed-line-records filename #'parse-colour-and-contents))
+
+
+(defun bag-has-colour (bag-rule colour)
+  (let
+      ((bag-colour (car bag-rule))
+       (bag-contents (cdr bag-rule)))
+
+    (when (assoc colour bag-contents :test #'equalp)
+      bag-colour)))
+
+
+(defun bags-which-contain (colour rules)
+  (remove nil
+	  (map 'list
+	       #'(lambda (x) (bag-has-colour x colour))
+	       rules)))
+
+
+(defun bags-which-could-contain (colour rules)
+  (let*
+      ((possible-bags
+	 (bags-which-contain colour rules))
+       (possible-containers
+	 (mapcan #'(lambda (x) (bags-which-contain x rules))
+		 possible-bags)))
+
+    (remove-duplicates
+     (append possible-bags
+	     possible-containers
+	     (mapcan #'(lambda (x) (bags-which-could-contain x rules))
+		     possible-containers)))))
+
+
+(let
+    ((test-rules (read-rules "07.test-input.txt"))
+     (sample-rules (read-rules "07.input.txt"))
+     (part-label (format nil "Day 7, part 1:")))
+
+  (labels
+      ((count-bags (rules)
+	 (length (bags-which-could-contain "shiny gold" rules))))
+
+    (when (/= 4
+	    (count-bags test-rules))
+      (error "~a bag count doesn't match" part-label))
+
+    (format t "~a ~a~%" part-label
+	    (count-bags sample-rules))))
