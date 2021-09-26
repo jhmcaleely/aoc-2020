@@ -67,29 +67,29 @@
 ;; answered "yes". What is the sum of those counts?
 
 
-(let
-    ((test-input (read-multiline-string-records "06.test-input.txt"))
-     (sample-input (read-multiline-string-records "06.input.txt"))
-     (part-label (format nil "Day 6, part 1:")))
+(defun sum-answers/6/1 (filename)
+  (let ((input (read-multiline-string-records filename)))
 
-  (labels
-      ((answers-in-group (group-answer)
-	 (remove-duplicates (remove #\Space group-answer)))
+    (labels
+	((answers-in-group (group-answer)
+	   (remove-duplicates (remove #\Space group-answer)))
 
-       (group-results (group-answers)
-	 (map 'list #'answers-in-group group-answers))
+	 (group-results (group-answers)
+	   (map 'list #'answers-in-group group-answers)))
 
-       (sum-answers (input)
-	 (reduce #'+
-		 (map 'list #'length
-		      (group-results input)))))
+      (reduce #'+
+	      (map 'list #'length
+		   (group-results input))))))
+    
 
-    (when (/= 11
-	      (sum-answers test-input))
-      (error "~a answers don't add up" part-label))
+(deftest test/6/1
+  (= 11
+     (sum-answers/6/1 "06.test-input.txt")))
 
-    (format t "~a ~a~%" part-label
-	    (sum-answers sample-input))))
+
+(defsolution solution/6/1 6 1
+  (sum-answers/6/1 "06.input.txt"))
+
 
 
 ;; --- Part Two ---
@@ -141,33 +141,33 @@
 ;; For each group, count the number of questions to which everyone
 ;; answered "yes". What is the sum of those counts?
 
-(let*
-    ((test-input (read-multiline-string-records "06.test-input.txt"))
-     (sample-input (read-multiline-string-records "06.input.txt"))
-     (part-label (format nil "Day 6, part 2:")))
 
-  (labels
-      ((answer-lists (input)
-	 (map 'list #'(lambda (x) (coerce x 'list))
-	      (split-sequence #\Space input)))
+(defun sum-answers/6/2 (filename)
+  (let ((input (read-multiline-string-records filename)))
 
-       (group-common-answers (group-answer)
-	 (if (= 1 (length group-answer))
-	     (first group-answer)
-	     (reduce #'intersection group-answer)))
+    (labels
+	((answer-lists (input)
+	   (map 'list #'(lambda (x) (coerce x 'list))
+		(split-sequence #\Space input)))
+	 
+	 (group-common-answers (group-answer)
+	   (if (= 1 (length group-answer))
+	       (first group-answer)
+	       (reduce #'intersection group-answer)))
+	 
+	 (common-answers (input)
+	   (map 'list #'group-common-answers
+		(map 'list #'answer-lists input))))
 
-       (common-answers (input)
-	 (map 'list #'group-common-answers
-	      (map 'list #'answer-lists input)))
+      (reduce #'+
+	      (map 'list #'length
+		   (common-answers input))))))
 
-       (sum-answers (input)
-	 (reduce #'+
-		 (Map 'list #'length
-		      (common-answers input)))))
 
-    (when (/= 6
-	      (sum-answers test-input))
-      (error "~a answers don't add up" part-label))
+(deftest test/6/2
+  (= 6
+     (sum-answers/6/2 "06.test-input.txt")))
 
-    (format t "~a ~a~%" part-label
-	    (sum-answers sample-input))))
+
+(defsolution solution/6/2 6 2
+  (sum-answers/6/2 "06.input.txt"))

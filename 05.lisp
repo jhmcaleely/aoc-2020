@@ -94,22 +94,17 @@
   (let ((location (seat-location boarding-pass)))
     (+ (* (car location) 8) (cdr location))))
 
-(let
-    ((test-input '("FBFBBFFRLR"))
-     (sample-input (read-line-records "05.input.txt"))
-     (part-label (format nil "Day 5, part 1:")))
 
-  (labels
-      ((max-id (input)
-	 (reduce #'max (map 'list #'seat-id input))))
+(deftest test/5/1
+  (= 357
+     (seat-id "FBFBBFFRLR")))
 
-  (when (/= 357
-	    (seat-id (first test-input)))
-    (error "~a test seat id mismatch" part-label))
 
-  (format t "~a ~a~%" part-label
-	  (max-id sample-input))))
-
+(defsolution solution/5/1 5 1
+  (reduce #'max
+	  (map 'list #'seat-id
+	       (read-line-records "05.input.txt"))))
+	 
 
 ;; --- Part Two ---
 ;;
@@ -126,18 +121,14 @@
 ;;
 ;; What is the ID of your seat?
 
-(let*
+
+(defsolution solution/5/2 5 2
+  (let*
     ((sample-input (read-line-records "05.input.txt"))
-     (part-label (format nil "Day 5, part 2:"))
      (occupied-seats (sort (map 'list #'seat-id sample-input) #'<)))
 
-  (labels
-      ((find-seat ()
-	 (do
-	  ((n 0 (1+ n))
-	   (seat-array (coerce occupied-seats 'vector)))
-	  ((/= (1+ (aref seat-array n))
-	       (aref seat-array (1+ n))) (1+ (aref seat-array n))))))
-
-    (format t "~a ~a~%" part-label
-	    (find-seat))))
+    (do
+     ((n 0 (1+ n))
+      (seat-array (coerce occupied-seats 'vector)))
+     ((/= (1+ (aref seat-array n))
+	  (aref seat-array (1+ n))) (1+ (aref seat-array n))))))

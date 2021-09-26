@@ -50,3 +50,50 @@
      subseqs (push
 	      (subseq sequence last-item next-item)
 	      subseqs))))
+
+
+;; A test framework. (self-test) to run them all
+
+
+(defparameter *test-cases* nil "Test cases registered for self-test")
+
+
+(defmacro deftest (name &body body)
+  `(progn
+     (defun ,name ()
+       ,@body)
+     (pushnew (quote ,name) *test-cases*)))
+
+
+(defun self-test ()
+  (unless (every #'identity
+		 (map 'list #'funcall *test-cases*))
+    (error "self test failed"))
+  t)
+
+
+;; reporting for solutions. (report-solutions) to output them all
+
+
+(defparameter *solutions* (make-array '(25 2) :initial-element nil))
+
+
+(defun register-solution (day part name)
+  (setf (aref *solutions* (1- day) (1- part)) name))
+
+
+(defmacro defsolution (name day part &body body)
+  `(progn
+     (defun ,name ()
+       ,@body)
+     (register-solution ,day ,part (quote ,name))))
+
+
+(defun report-solutions ()
+  (dotimes (day 25)
+    (dotimes (part 2)
+      (when (aref *solutions* day part)
+	(format t "Day ~a, part ~a: ~a~%"
+		(1+ day)
+		(1+ part)
+		(funcall (aref *solutions* day part)))))))

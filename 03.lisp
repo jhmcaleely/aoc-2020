@@ -83,8 +83,10 @@
     map))
 
 
-(defun count-trees-on-slope (across down tree-map)
-  (let ((map-width (array-dimension tree-map 0))
+(defun count-trees-on-slope-map (slope tree-map)
+  (let ((across (first slope))
+	(down (second slope))
+	(map-width (array-dimension tree-map 0))
 	(map-height (array-dimension tree-map 1)))
 
     (do ((x across (mod (+ across x) map-width))
@@ -95,21 +97,18 @@
 	  (incf n)))))
 
 
-(defun output-count (part test-count)
-  (let
-      ((test-map (make-tree-map "03.test-input.txt"))
-       (sample-map (make-tree-map "03.input.txt"))
-       (part-label (format nil "Day 3, part ~a:" part)))
-
-    (when (/= test-count
-	      (count-trees-on-slope 3 1 test-map))
-      (error "~a tree count not matched" part-label))
-
-    (format t "~a ~a~%" part-label
-	    (count-trees-on-slope 3 1 sample-map))))
+(defun count-trees-on-slope (slope filename)
+  (count-trees-on-slope-map slope (make-tree-map filename)))
 
 
-(output-count 1 7)
+(deftest test/3/1
+  (= 7
+     (count-trees-on-slope '(3 1) "03.test-input.txt")))
+
+
+(defsolution solution/3/1 3 1
+  (count-trees-on-slope '(3 1) "03.input.txt"))
+
 
 ;; Time to check the rest of the slopes - you need to minimize the
 ;; probability of a sudden arboreal stop, after all.
@@ -132,29 +131,22 @@
 ;; encountered on each of the listed slopes?
 
 
-(defun output-product (part test-product)
-  (let
-      ((test-map (make-tree-map "03.test-input.txt"))
-       (sample-map (make-tree-map "03.input.txt"))
-       (part-label (format nil "Day 3, part ~a:" part))
-       (test-slopes '((1 1) (3 1) (5 1) (7 1) (1 2))))
+(defun compute-slope-product (filename)
+  (let ((tree-map (make-tree-map filename))
+	(test-slopes '((1 1) (3 1) (5 1) (7 1) (1 2))))
 
-    (labels
-	((compute-product (input)
-	   (reduce #'*
-		   (map 'list
-			#'(lambda (x)
-			    (count-trees-on-slope (first x)
-						  (second x)
-						  input))
-			test-slopes))))
-
-      (when (/= test-product
-		(compute-product test-map))
-	(error "~a product not matched" part-label))
-
-      (format t "~a ~a~%" part-label
-	      (compute-product sample-map)))))
+    (reduce #'*
+	    (map 'list
+		 #'(lambda (slope)
+		     (count-trees-on-slope-map slope tree-map))
+		 test-slopes))))
 
 
-(output-product 2 336)
+(deftest test/3/2
+  (= 336
+     (compute-slope-product "03.test-input.txt")))
+
+
+(defsolution solution/3/2 3 2
+  (compute-slope-product "03.input.txt"))
+

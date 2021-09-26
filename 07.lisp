@@ -123,21 +123,25 @@
 		     possible-containers)))))
 
 
-(let
-    ((test-rules (read-rules "07.test-input.txt"))
-     (sample-rules (read-rules "07.input.txt"))
-     (part-label (format nil "Day 7, part 1:")))
+(deftest test/7/1a
+  (= 9
+     (length (read-rules "07.test-input.txt"))))
 
-  (labels
-      ((count-bags (rules)
-	 (length (bags-which-could-contain "shiny gold" rules))))
 
-    (when (/= 4
-	    (count-bags test-rules))
-      (error "~a bag count doesn't match" part-label))
+(defun count-bags (filename)
+  (length
+   (bags-which-could-contain
+    "shiny gold"
+    (read-rules filename))))
 
-    (format t "~a ~a~%" part-label
-	    (count-bags sample-rules))))
+
+(deftest test/7/1b
+  (= 4
+     (count-bags "07.test-input.txt")))
+
+
+(defsolution solution/7/1 7 1
+  (count-bags "07.input.txt"))
 
 
 ;; --- Part Two ---
@@ -213,7 +217,7 @@
 	 (contained-bags)))))
 
 
-(defun test-example-1 ()
+(deftest test/7/2a
   (let ((test-rules (read-rules "07.test-input.txt")))
     (labels
 	((test (colour count)
@@ -224,23 +228,19 @@
        (test "dotted black" 0)
        (test "vibrant plum" 11)
        (test "dark olive" 7)
-       (= 32 (all-contained-bags "shiny gold" test-rules))))))
+       (= 32
+	  (all-contained-bags "shiny gold" test-rules))))))
 
 
-(defun test-example-2 ()
-  (let
-      ((test-rules (read-rules "07-2.test-input.txt")))
-    (= 126 (all-contained-bags "shiny gold" test-rules))))
+(deftest test/7/2b
+  (= 126
+     (all-contained-bags
+      "shiny gold"
+      (read-rules "07-2.test-input.txt"))))
 
 
-(unless (and
-	 (test-example-1)
-	 (test-example-2))
-  (error "self-test failed"))
+(defsolution solution/7/2 7 2
+  (all-contained-bags
+   "shiny gold"
+   (read-rules "07.input.txt")))
 
-
-(let ((sample-rules (read-rules "07.input.txt"))
-      (part-label (format nil "Day 7, part 2:")))
-
-    (format t "~a ~a~%" part-label
-	    (all-contained-bags "shiny gold" sample-rules)))

@@ -114,24 +114,22 @@
 	      #'(lambda (x) (assoc x passport :test #'equalp))
 	      (mandatory-fields))))
 
-(let
-    ((test-input (read-passports "04.test-input.txt"))
-     (sample-input (read-passports "04.input.txt"))
-     (part-label (format nil "Day 4, part 1:")))
 
-  (labels
-      ((count-valid (input)
-	 (count t
-		(map 'list
-		     #'mandatory-fields-present-p
-		     input))))
+(defun count-valid (method input)
+  (count t
+	 (map 'list
+	      method
+	      (read-passports input))))
 
-    (when (/= 2
-	      (count-valid test-input))
-      (error "~a valid pasport count not matched" part-label))
 
-    (format t "~a ~a~%" part-label
-	    (count-valid sample-input))))
+(deftest test/4/1
+  (= 2
+     (count-valid #'mandatory-fields-present-p "04.test-input.txt")))
+
+
+(defsolution solution/4/1 4 1
+  (count-valid #'mandatory-fields-present-p "04.input.txt"))
+
 
 ;; The line is moving more quickly now, but you overhear airport
 ;; security talking about how passports with invalid data are getting
@@ -290,16 +288,5 @@
    (mandatory-fields-present-p passport)))
 
 
-(let
-    ((sample-input (read-passports "04.input.txt"))
-     (part-label (format nil "Day 4, part 2:")))
-
-  (labels
-      ((count-valid (input)
-	 (count t
-		(map 'list
-		     #'validated-passport-p
-		     input))))
-
-    (format t "~a ~a~%" part-label
-	    (count-valid sample-input))))
+(defsolution solution/4/2 4 2
+  (count-valid #'validated-passport-p "04.input.txt"))

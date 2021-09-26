@@ -35,30 +35,35 @@
 	    (find-pair-if tail predicate-p))))))
 
 
-(defun output-product (part test-product find-sum)
-  (let
-      ((target-sum 2020)
-       (test-input '(1721 979 366 299 675 1456))
-       (sample-input (read-parsed-line-records "01.input.txt" #'parse-integer))
-       (part-label (format nil "Day 1, part ~a:" part)))
-
-    (labels
-	((find-product (input)
-	   (reduce #'* (funcall find-sum target-sum input))))
-					; Evaluate test case
-      (when (/= test-product
-		(find-product test-input))
-	(error "~a product not matched" part-label))
-					; Output answer
-      (format t "~a ~a~%" part-label
-	      (find-product sample-input)))))
-
-
 (defun find-pair-sum (n list)
   (find-pair-if list (lambda (a b) (= (+ a b) n))))
 
 
-(output-product 1 514579 #'find-pair-sum)
+(defun output-product/1 (method input)
+  (reduce #'*
+	  (funcall method 2020 input)))
+
+
+(defun test-method (target method)
+  (let
+      ((test-input '(1721 979 366 299 675 1456)))
+
+    (= target (output-product/1 method test-input))))
+
+
+(defun output-method (method)
+  (let
+      ((sample-input (read-parsed-line-records "01.input.txt"
+					       #'parse-integer)))
+    (output-product/1 method sample-input)))
+
+
+(deftest test/1/1
+  (test-method 514579 #'find-pair-sum))
+
+
+(defsolution solution/1/1 1 1
+  (output-method #'find-pair-sum))
 
 
 ;; The Elves in accounting are thankful for your help one of them even
@@ -85,4 +90,8 @@
 	    (find-triple-sum n tail))))))
 
 
-(output-product 2 241861950 #'find-triple-sum)
+(deftest test/1/2
+  (test-method 241861950 #'find-triple-sum))
+
+(defsolution solution/1/2 1 2
+  (output-method #'find-triple-sum))

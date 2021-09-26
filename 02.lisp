@@ -38,24 +38,6 @@
     (list min max rule-char password)))
 
 
-(defun output-count (part test-count valid-record)
-  (let
-      ((test-input (read-parsed-line-records "02.test-input.txt" #'parse-record))
-       (sample-input (read-parsed-line-records "02.input.txt" #'parse-record))
-       (part-label (format nil "Day 2, part ~a:" part)))
-
-    (labels
-	((count-valid (input)
-	   (count t (map 'list valid-record input))))
-
-      (when (/= test-count
-		(count-valid test-input))
-	(error "~a password count not matched" part-label))
-
-      (format t "~a ~a~%" part-label
-	      (count-valid sample-input)))))
-
-
 (defun valid-password1 (password-record)
   (let* ((lowest (first password-record))
 	(highest (second password-record))
@@ -67,7 +49,21 @@
      (>= highest char-count))))
 
 
-(output-count 1 2 #'valid-password1)
+(defun count-valid-in (method filename)
+  (let
+      ((input (read-parsed-line-records filename #'parse-record)))
+    (count t (map 'list method input))))
+
+
+(defun test-method/2 (method target)
+  (= target
+     (count-valid-in method "02.test-input.txt")))
+
+(deftest test/2/1
+  (test-method/2 #'valid-password1 2))
+
+(defsolution solution/2/1 2 1
+  (count-valid-in #'valid-password1 "02.input.txt"))
 
 
 ;; While it appears you validated the passwords correctly, they don't
@@ -114,4 +110,8 @@
 	  (eql character (char-at-position password position2))))))
 
 
-(output-count 2 1 #'valid-password2)
+(deftest test/2/2
+  (test-method/2 #'valid-password2 1))
+
+(defsolution solution/2/2 2 2
+  (count-valid-in #'valid-password2 "02.input.txt"))
