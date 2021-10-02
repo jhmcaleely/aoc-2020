@@ -72,3 +72,67 @@
 ;;
 ;; Run your copy of the boot code. Immediately before any instruction
 ;; is executed a second time, what value is in the accumulator?
+
+
+(defun parse-instruction (input)
+  (let ((instruction (subseq input 0 3))
+	(operand (subseq input 4)))
+    (cons
+     (cond
+       ((string= instruction "nop") ':nop)
+       ((string= instruction "acc") ':acc)
+       ((string= instruction "jmp") ':jmp))
+     (parse-integer operand))))
+
+
+(defclass machine ()
+  ((instruction-pointer
+    :initform 0
+    :accessor instruction-pointer)
+   (accumulator
+    :initform 0
+    :accessor accumulator)))
+
+
+(defmethod print-object ((machine machine) stream)
+  (print-unreadable-object (machine stream :type t)
+    (with-slots (instruction-pointer accumulator) machine
+      (format stream "ip: ~a acc: ~a" instruction-pointer accumulator))))
+
+
+(defun execute-instruction (instruction machine)
+  (let ((op (car instruction))
+	(param (cdr instruction)))
+
+    (with-slots (instruction-pointer accumulator) machine
+
+      (cond
+	((eq op :nop) (incf instruction-pointer))
+	((eq op :acc) (progn
+			(incf accumulator param)
+			(incf instruction-pointer)))
+	((eq op :jmp) (incf instruction-pointer param))))))
+
+
+(defun run-aoc-program (filename)
+  (let*
+      ((source (read-parsed-line-records filename #'parse-instruction))
+       (program (coerce source 'vector))
+       (visited (make-array (length program) :initial-element nil))
+       (machine (make-instance 'machine)))
+
+    (with-slots (accumulator instruction-pointer) machine
+
+      (loop while (not (aref visited instruction-pointer))
+	    do (setf (aref visited instruction-pointer) t)
+	       (execute-instruction (aref program instruction-pointer) machine))
+    accumulator)))
+
+
+(deftest test/8/1
+  (= 5
+     (run-aoc-program "08.test-input.txt")))
+
+
+(defsolution solution/8/1 8 1
+  (run-aoc-program "08.input.txt"))
