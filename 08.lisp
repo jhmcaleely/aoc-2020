@@ -114,19 +114,31 @@
 	((eq op :jmp) (incf instruction-pointer param))))))
 
 
-(defun run-aoc-program (filename)
-  (let*
-      ((source (read-parsed-line-records filename #'parse-instruction))
-       (program (coerce source 'vector))
-       (visited (make-array (length program) :initial-element nil))
+(defun execute-program (program)
+  (let
+      ((visited (make-array (length program) :initial-element nil))
        (machine (make-instance 'machine)))
 
     (with-slots (accumulator instruction-pointer) machine
 
-      (loop while (not (aref visited instruction-pointer))
+      (loop while (and
+		   (< instruction-pointer (length program))
+		   (not (aref visited instruction-pointer)))
 	    do (setf (aref visited instruction-pointer) t)
 	       (execute-instruction (aref program instruction-pointer) machine))
-    accumulator)))
+      (values
+       accumulator
+       (= instruction-pointer (length program))))))
+
+
+(defun load-aoc-program (filename)
+  (coerce
+   (read-parsed-line-records filename #'parse-instruction)
+   'vector))
+
+
+(defun run-aoc-program (filename)
+  (execute-program (load-aoc-program filename)))
 
 
 (deftest test/8/1
@@ -192,3 +204,43 @@
 ;; Fix the program so that it terminates normally by changing exactly
 ;; one jmp (to nop) or nop (to jmp). What is the value of the
 ;; accumulator after the program terminates?
+
+
+(defun flip-instruction (instruction)
+  (cond
+    ((eq (car instruction) :nop) (setf (car instruction) :jmp))
+    ((eq (car instruction) :jmp) (setf (car instruction) :nop))))
+
+
+(defun run-test/8/2 ()
+  (let
+      ((program (load-aoc-program "08.test-input.txt")))
+
+    (flip-instruction (aref program 7))
+    (execute-program program)))
+
+
+(deftest test/8/2
+  (multiple-value-bind (acc terminated-p) (run-test/8/2)
+    (and
+     (= 8 acc)
+     terminated-p)))
+
+
+(defsolution solution/8/2 8 2
+  (let
+      ((program (load-aoc-program "08.input.txt")))
+
+    (labels
+	((test-program (index)
+	   (flip-instruction (aref program index))
+	   (multiple-value-prog1
+	       (execute-program program)
+	     (flip-instruction (aref program index)))))
+
+      (dotimes (i (length program))
+	(unless (eq (car (aref program i)) :acc)
+	  (multiple-value-bind (acc terminated-p)
+	      (test-program i)
+	    (when terminated-p
+	      (return acc))))))))
