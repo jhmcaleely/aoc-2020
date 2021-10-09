@@ -52,6 +52,17 @@
 	      subseqs))))
 
 
+;; Recursively search pairs in a list that match the supplied predicate
+(defun find-pair-if (list predicate-p)
+  (let ((head (first list))
+	(tail (rest list)))
+    (when tail
+      (let ((match (find-if (lambda (a) (funcall predicate-p head a)) tail)))
+	(if match
+	    (list head match)
+	    (find-pair-if tail predicate-p))))))
+
+
 ;; A test framework. (self-test) to run them all
 
 

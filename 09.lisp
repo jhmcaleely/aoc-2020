@@ -73,3 +73,23 @@
 ;; the sum of two of the 25 numbers before it. What is the first
 ;; number that does not have this property?
 
+
+(defun find-weakness (filename preamble)
+  (do*
+   ((input-series (read-parsed-line-records filename #'parse-integer))
+    (index 0 (1+ index))
+    (prev (subseq input-series index (+ preamble index))
+	  (subseq input-series index (+ preamble index)))
+    (cursor (nth (+ preamble index) input-series)
+	    (nth (+ preamble index) input-series)))
+   ((not (find-pair-if prev #'(lambda (a b) (= cursor (+ a b)))))
+    cursor)))
+
+
+(deftest test/9/1
+  (= 127
+     (find-weakness "09.test-input.txt" 5)))
+
+
+(defsolution solution/9/1 9 1
+  (find-weakness "09.input.txt" 25))

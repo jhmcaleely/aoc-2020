@@ -24,17 +24,6 @@
 ;; that sum to 2020; what do you get if you multiply them together?
 
 
-;; Recursively search pairs in a list that match the supplied predicate
-(defun find-pair-if (list predicate-p)
-  (let ((head (first list))
-	(tail (rest list)))
-    (when tail
-      (let ((match (find-if (lambda (a) (funcall predicate-p head a)) tail)))
-	(if match
-	    (list head match)
-	    (find-pair-if tail predicate-p))))))
-
-
 (defun find-pair-sum (n list)
   (find-pair-if list (lambda (a b) (= (+ a b) n))))
 
