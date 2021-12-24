@@ -136,3 +136,24 @@
 ;;
 ;; What is the encryption weakness in your XMAS-encrypted list of
 ;; numbers?
+
+(defun contig-sum (input target-sum)
+  (do*
+   ((index 0 (1+ index))
+    (cursor (subseq input 0 index))
+    (result (apply #'+ cursor)))
+   ((<= result target-sum) cursor)))
+
+(defun find-weakness2 (filename target-sum)
+  (let*
+      ((input-series (read-parsed-line-records filename #'parse-integer))
+       (weakness (contig-sum input-series target-sum)))
+    (+ (apply #'min weakness) (apply #'max weakness))))
+
+
+(deftest test/9/2
+  (= 62
+     (find-weakness2 "09.test-input.txt" 127)))
+
+(defsolution solution/9/2 9 2
+  (find-weakness2 "09.input.txt" 542529149))
